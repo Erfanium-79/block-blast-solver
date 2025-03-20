@@ -1,5 +1,5 @@
 import numpy as np
-import tkinter as tk
+# import tkinter as tk
 
 def remove_filled_rows_and_cols(arr: np.ndarray) -> np.ndarray:
     #get row and col indicies of all one values
@@ -12,66 +12,71 @@ def remove_filled_rows_and_cols(arr: np.ndarray) -> np.ndarray:
 
     return arr
 
-
 def toggle_cell(buttons, grid_array, row, col):
+    """Toggle the color of a button and update the corresponding array."""
     current_color = buttons[row][col].cget("bg")
     new_color = "black" if current_color == "white" else "white"
     buttons[row][col].config(bg=new_color)
     grid_array[row, col] = 1 if new_color == "black" else 0
 
-def print_arrays():
-    print("Main Grid:")
-    print(main_grid_array)
-    print("Block 1:")
-    print(block_arrays[0])
-    print("Block 2:")
-    print(block_arrays[1])
-    print("Block 3:")
-    print(block_arrays[2])
+def save_and_exit(root):
+    """Close the Tkinter window."""
+    root.destroy()
 
-# Initialize the main window
-root = tk.Tk()
-root.title("Block Blast Grid Selector")
+def can_place_block(grid: np.ndarray, block: np.ndarray) -> bool:
+    """Check if the block can be placed in any position on the grid."""
+    grid_size = 8
+    block_rows, block_cols = np.where(block == 1)  # Get positions of 1s
 
-grid_size = 8
-block_size = 5
+    for i in range(grid_size):
+        for j in range(grid_size):
+            if all(0 <= i + r < grid_size and 0 <= j + c < grid_size and grid[i + r, j + c] == 0
+                   for r, c in zip(block_rows, block_cols)):
+                return True  # Found at least one valid placement
 
-# Frame for main grid
-main_frame = tk.Frame(root)
-main_frame.pack()
+    return False  # No valid placement found
 
-# Main 8x8 grid
-main_buttons = []
-main_grid_array = np.zeros((grid_size, grid_size), dtype=int)
-for r in range(grid_size):
-    row_buttons = []
-    for c in range(grid_size):
-        btn = tk.Button(main_frame, width=4, height=2, bg="white", command=lambda r=r, c=c: toggle_cell(main_buttons, main_grid_array, r, c))
-        btn.grid(row=r, column=c, padx=1, pady=1)
-        row_buttons.append(btn)
-    main_buttons.append(row_buttons)
+def trim_block(block: np.ndarray) -> np.ndarray:
+    """Trim empty rows and columns from the block to focus only on its occupied area."""
+    rows, cols = np.where(block == 1)  # Get positions of 1s
+    if len(rows) == 0:  # If the block is empty, return it as is
+        return block
+    return block[min(rows):max(rows) + 1, min(cols):max(cols) + 1]
 
-# Frame for blocks
-blocks_frame = tk.Frame(root)
-blocks_frame.pack(pady=10)
+def can_place_block(grid: np.ndarray, block: np.ndarray) -> bool:
+    """Check if the trimmed block can be placed in any position on the grid."""
+    grid_size = 8
+    block = trim_block(block)  # Trim the block before processing
+    block_shape = block.shape
+    block_rows, block_cols = np.where(block == 1)  # Get positions of 1s
 
-block_buttons = []
-block_arrays = [np.zeros((block_size, block_size), dtype=int) for _ in range(3)]
-for b in range(3):
-    frame = tk.Frame(blocks_frame)
-    frame.grid(row=0, column=b, padx=10)
-    buttons = []
-    for r in range(block_size):
-        row_buttons = []
-        for c in range(block_size):
-            btn = tk.Button(frame, width=4, height=2, bg="white", command=lambda r=r, c=c, b=b: toggle_cell(block_buttons[b], block_arrays[b], r, c))
-            btn.grid(row=r, column=c, padx=1, pady=1)
-            row_buttons.append(btn)
-        buttons.append(row_buttons)
-    block_buttons.append(buttons)
+    for i in range(grid_size - block_shape[0] + 1):
+        for j in range(grid_size - block_shape[1] + 1):
+            if all(grid[i + r, j + c] == 0 for r, c in zip(block_rows, block_cols)):
+                return True  # Found at least one valid placement
 
-# Button to print the final arrays
-submit_btn = tk.Button(root, text="Print Arrays", command=print_arrays)
-submit_btn.pack(pady=10)
+    return False  # No valid placement found
 
-root.mainloop()
+def place_block_and_get_states(grid: np.ndarray, block: np.ndarray) -> list:
+    """Place the trimmed block at all possible locations and return the new grid states."""
+    grid_size = 8
+    block = trim_block(block)  # Trim the block before processing
+    block_shape = block.shape
+    block_rows, block_cols = np.where(block == 1)  # Get positions of 1s
+    valid_states = []
+
+    for i in range(grid_size - block_shape[0] + 1):
+        for j in range(grid_size - block_shape[1] + 1):
+            if all(grid[i + r, j + c] == 0 for r, c in zip(block_rows, block_cols)):
+                new_grid = grid.copy()
+
+                # Place the block
+                for r, c in zip(block_rows, block_cols):
+                    new_grid[i + r, j + c] = 1
+
+                # Remove filled rows and columns
+                new_grid = remove_filled_rows_and_cols(new_grid)
+
+                valid_states.append(new_grid)
+
+    return valid_states  # List of all possible resulting grids
