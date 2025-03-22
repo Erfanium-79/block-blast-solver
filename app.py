@@ -1,5 +1,6 @@
 import tkinter as tk
 import numpy as np
+import heapq
 from utils import *  # Import functions from utils.py
 
 # Initialize Tkinter window
@@ -53,21 +54,21 @@ root.update()
 root.wait_window()
 
 
-if __name__ == "__main__":
+# if __name__ == "__main__":
     # print("Main Grid:\n", main_grid_array)
     # print("Block 1:\n", block_arrays[0])
     # print("Block 2:\n", block_arrays[1])
     # print("Block 3:\n", block_arrays[2])
-    # print(can_place_block(main_grid_array, block_arrays[0]))
-    # grid = np.zeros((8, 8), dtype=int)
-    # block = np.array([
-    #     [0, 0, 0, 0, 0],
-    #     [0, 1, 1, 0, 0],
-    #     [0, 1, 1, 0, 0],
-    #     [0, 0, 0, 0, 0],
-    #     [0, 0, 0, 0, 0]
-    # ])
+#     # print(can_place_block(main_grid_array, block_arrays[0]))
+#     # grid = np.zeros((8, 8), dtype=int)
+#     # block = np.array([
+#     #     [0, 0, 0, 0, 0],
+#     #     [0, 1, 1, 0, 0],
+#     #     [0, 1, 1, 0, 0],
+#     #     [0, 0, 0, 0, 0],
+#     #     [0, 0, 0, 0, 0]
+#     # ])
 
-    resulting_grids = place_block_and_get_states(main_grid_array, block_arrays[0])
-    print(f"Number of valid placements: {len(resulting_grids)}")
-    print(resulting_grids)
+#     resulting_grids = place_block_and_get_states(main_grid_array, block_arrays[0])
+#     print(f"Number of valid placements: {len(resulting_grids)}")
+#     print(resulting_grids)
